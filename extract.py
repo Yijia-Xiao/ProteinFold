@@ -9,7 +9,7 @@ import pathlib
 
 import torch
 
-from fold import Alphabet, FastaBatchedDataset, ProteinBertModel, pretrained
+from fold import Alphabet, FastaBatchedDataset, pretrained
 
 
 def create_parser():

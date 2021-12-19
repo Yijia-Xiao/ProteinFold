@@ -8,7 +8,7 @@ import pathlib
 
 import torch
 
-from esm import Alphabet, FastaBatchedDataset, ProteinBertModel, pretrained, MegatronMSA
+from esm import Alphabet, FastaBatchedDataset, pretrained, MegatronMSA
 import pandas as pd
 from tqdm import tqdm
 from Bio import SeqIO
