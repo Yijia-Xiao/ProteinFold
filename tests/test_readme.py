@@ -10,7 +10,7 @@ import requests
 import shutil
 from pathlib import Path
 import torch
-import esm
+import fold
 
 
 def test_readme_1():
@@ -21,10 +21,10 @@ def test_readme_1():
 
 def test_readme_2():
     import torch
-    import esm
+    import fold
 
     # Load ESM-1b model
-    model, alphabet = esm.pretrained.esm1b_t33_650M_UR50S()
+    model, alphabet = fold.pretrained.esm1b_t33_650M_UR50S()
     batch_converter = alphabet.get_batch_converter()
 
     # Prepare data (first 2 sequences from ESMStructuralSplitDataset superfamily / 4)
@@ -105,8 +105,8 @@ def confirm_all_tensors_equal(local_dir: str, ref_dir: str) -> None:
 
 
 def test_msa_transformers():
-    _test_msa_transformer(*esm.pretrained.esm_msa1_t12_100M_UR50S())
-    _test_msa_transformer(*esm.pretrained.esm_msa1b_t12_100M_UR50S())
+    _test_msa_transformer(*fold.pretrained.esm_msa1_t12_100M_UR50S())
+    _test_msa_transformer(*fold.pretrained.esm_msa1b_t12_100M_UR50S())
 
 
 def _test_msa_transformer(model, alphabet):

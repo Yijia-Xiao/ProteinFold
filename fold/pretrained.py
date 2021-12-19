@@ -8,7 +8,7 @@ import warnings
 import urllib
 from pathlib import Path
 import torch
-import esm
+import fold
 
 
 def _has_regression_weights(model_name):
@@ -77,7 +77,7 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
     if regression_data is not None:
         model_data["model"].update(regression_data["model"])
 
-    alphabet = esm.Alphabet.from_architecture(model_data["args"].arch)
+    alphabet = fold.Alphabet.from_architecture(model_data["args"].arch)
 
     if model_data["args"].arch == "msa_transformer":
 
@@ -94,7 +94,7 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
             emb_dim = model_state["msa_position_embedding"].size(-1)
             model_args["embed_positions_msa_dim"] = emb_dim  # initial release, bug: emb_dim==1
 
-        model_type = esm.MegatronMSA
+        model_type = fold.MegatronMSA
 
     else:
         raise ValueError("Unknown architecture selected")
@@ -131,6 +131,14 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
     model.load_state_dict(model_state, strict=regression_data is not None)
 
     return model, alphabet
+
+
+def megatron_msa_1B():
+    """14 layer MSA transformer model with 1B params.
+
+    Returns a tuple of (Model, Alphabet).
+    """
+    return load_model_and_alphabet_hub("megatron_msa_1B")
 
 
 def esm1_t34_670M_UR50S():
@@ -185,7 +193,7 @@ def esm1b_t33_650M_UR50S():
 def esm_msa1_t12_100M_UR50S():
     warnings.warn(
         "This model had a minor bug in the positional embeddings, "
-        "please use ESM-MSA-1b: esm.pretrained.esm_msa1b_t12_100M_UR50S()",
+        "please use ESM-MSA-1b: fold.pretrained.esm_msa1b_t12_100M_UR50S()",
     )
     return load_model_and_alphabet_hub("esm_msa1_t12_100M_UR50S")
 
