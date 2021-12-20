@@ -56,6 +56,7 @@ def load_model_and_alphabet_hub(model_name):
 
 
 def load_model_and_alphabet_local(model_location):
+    print('load_model_and_alphabet_local')
     """ Load from local path. The regression weights need to be co-located """
     model_location = Path(model_location)
     model_data = torch.load(str(model_location), map_location="cpu")
@@ -74,12 +75,13 @@ def has_emb_layer_norm_before(model_state):
 
 
 def load_model_and_alphabet_core(model_data, regression_data=None):
+    print('load_model_and_alphabet_core')
     if regression_data is not None:
         model_data["model"].update(regression_data["model"])
+    arch = "msa_transformer"
+    alphabet = fold.Alphabet.from_architecture(arch)
 
-    alphabet = fold.Alphabet.from_architecture(model_data["args"].arch)
-
-    if model_data["args"].arch == "msa_transformer":
+    if arch == "msa_transformer":
 
         # upgrade state dict
         pra = lambda s: "".join(s.split("encoder_")[1:] if "encoder" in s else s)
@@ -88,7 +90,11 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
             s.split("sentence_encoder.")[1:] if "sentence_encoder" in s else s
         )
         prs3 = lambda s: s.replace("row", "column") if "row" in s else s.replace("column", "row")
-        model_args = {pra(arg[0]): arg[1] for arg in vars(model_data["args"]).items()}
+        # prs3 = lambda s: s.replace("column", "row") if "row" in s else s.replace("row", "column")
+        keys = ['embed_dim', 'embed_positions_msa', 'layers', 'dropout', 'ffn_embed_dim', 'attention_heads', 'attention_dropout', 'activation_dropout', 'max_tokens', 'max_positions']
+        # print(model_data["args"])
+        model_args = {pra(arg[0]): arg[1] for arg in vars(model_data["args"]).items() if pra(arg[0]) in keys}
+        # print(model_args.keys())
         model_state = {prs1(prs2(prs3(arg[0]))): arg[1] for arg in model_data["model"].items()}
         if model_args.get("embed_positions_msa", False):
             emb_dim = model_state["msa_position_embedding"].size(-1)
