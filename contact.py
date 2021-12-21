@@ -41,7 +41,8 @@ def read_msa(filename: str, nseq: int) -> List[Tuple[str, str]]:
 # 
 # The MSAs used here are samples from the [`trRosetta` (v1) dataset](https://yanglab.nankai.edu.cn/trRosetta/benchmark/), also used in the MSA Transformer paper.
 
-msa_transformer, msa_alphabet = fold.pretrained.esm_msa1b_t12_100M_UR50S()
+# msa_transformer, msa_alphabet = fold.pretrained.esm_msa1b_t12_100M_UR50S()
+msa_transformer, msa_alphabet = fold.pretrained.megatron_msa_1B()
 msa_transformer = msa_transformer.eval().cuda()
 msa_batch_converter = msa_alphabet.get_batch_converter()
 

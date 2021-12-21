@@ -94,7 +94,6 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
         keys = ['embed_dim', 'embed_positions_msa', 'layers', 'dropout', 'ffn_embed_dim', 'attention_heads', 'attention_dropout', 'activation_dropout', 'max_tokens', 'max_positions']
         # print(model_data["args"])
         model_args = {pra(arg[0]): arg[1] for arg in vars(model_data["args"]).items() if pra(arg[0]) in keys}
-        # print(model_args.keys())
         model_state = {prs1(prs2(prs3(arg[0]))): arg[1] for arg in model_data["model"].items()}
         if model_args.get("embed_positions_msa", False):
             emb_dim = model_state["msa_position_embedding"].size(-1)
@@ -144,7 +143,8 @@ def megatron_msa_1B():
 
     Returns a tuple of (Model, Alphabet).
     """
-    return load_model_and_alphabet_hub("megatron_msa_1B")
+    # return load_model_and_alphabet_hub("megatron_msa_1B")
+    return load_model_and_alphabet_local("./data/megatron.pt")
 
 
 def esm1_t34_670M_UR50S():
