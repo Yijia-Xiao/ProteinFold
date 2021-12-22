@@ -107,6 +107,7 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
         if model_args.get("add_msa_positional_embedding", False):
             emb_dim = model_state["embedding"]["msa_positional_embeddings"]["weight"].size(-1)
             model_args["embed_positions_msa_dim"] = emb_dim  # initial release, bug: emb_dim==1
+            model_args["embed_positions_msa"] = True
 
         model_type = fold.MegatronMSA
 
@@ -117,8 +118,8 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
         Namespace(**model_args),
         alphabet,
     )
-    # print(model)
-    # torch.save(model.state_dict(), 'esm.pt')
+    # print(model.msa_position_embedding)
+    torch.save(model.state_dict(), './data/esm.pt')
 
     expected_keys = set(model.state_dict().keys())
     found_keys = set(model_state.keys())

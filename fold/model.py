@@ -98,7 +98,7 @@ class MegatronMSA(nn.Module):
         self.eos_idx = alphabet.eos_idx
         self.prepend_bos = alphabet.prepend_bos
         self.append_eos = alphabet.append_eos
-        print(self.args)
+        # print(self.args)
         self.embed_tokens = nn.Embedding(
             self.alphabet_size, self.args.hidden_size, padding_idx=self.padding_idx
         )
