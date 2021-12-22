@@ -98,11 +98,14 @@ class MegatronMSA(nn.Module):
         self.eos_idx = alphabet.eos_idx
         self.prepend_bos = alphabet.prepend_bos
         self.append_eos = alphabet.append_eos
-        # print(self.args)
         self.embed_tokens = nn.Embedding(
             self.alphabet_size, self.args.hidden_size, padding_idx=self.padding_idx
         )
-
+        self.embed_positions = LearnedPositionalEmbedding(
+            self.args.max_position_embeddings,
+            self.args.hidden_size,
+            self.padding_idx,
+        )
         if getattr(self.args, "embed_positions_msa", False):
             emb_dim = getattr(self.args, "embed_positions_msa_dim", self.args.hidden_size)
             self.msa_position_embedding = nn.Parameter(
@@ -111,6 +114,7 @@ class MegatronMSA(nn.Module):
             )
         else:
             self.register_parameter("msa_position_embedding", None)
+        self.emb_layer_norm_before = ESM1bLayerNorm(self.args.hidden_size)
 
         self.dropout_module = nn.Dropout(self.args.hidden_dropout)
         self.layers = nn.ModuleList(
@@ -128,24 +132,18 @@ class MegatronMSA(nn.Module):
             ]
         )
 
+        self.emb_layer_norm_after = ESM1bLayerNorm(self.args.hidden_size)
         self.contact_head = ContactPredictionHead(
             self.args.num_layers * self.args.num_attention_heads,
             self.prepend_bos,
             self.append_eos,
             eos_idx=self.eos_idx,
         )
-        self.embed_positions = LearnedPositionalEmbedding(
-            self.args.max_position_embeddings,
-            self.args.hidden_size,
-            self.padding_idx,
-        )
-        self.emb_layer_norm_before = ESM1bLayerNorm(self.args.hidden_size)
-        self.emb_layer_norm_after = ESM1bLayerNorm(self.args.hidden_size)
-        self.lm_head = RobertaLMHead(
-            embed_dim=self.args.hidden_size,
-            output_dim=self.alphabet_size,
-            weight=self.embed_tokens.weight,
-        )
+        # self.lm_head = RobertaLMHead(
+        #     embed_dim=self.args.hidden_size,
+        #     output_dim=self.alphabet_size,
+        #     weight=self.embed_tokens.weight,
+        # )
 
     def forward(self, tokens, repr_layers=[], need_head_weights=False, return_contacts=False):
         if return_contacts:
@@ -207,7 +205,7 @@ class MegatronMSA(nn.Module):
         # last hidden representation should have layer norm applied
         if (layer_idx + 1) in repr_layers:
             hidden_representations[layer_idx + 1] = x
-        x = self.lm_head(x)
+        # x = self.lm_head(x)
 
         result = {"logits": x, "representations": hidden_representations}
         if need_head_weights:

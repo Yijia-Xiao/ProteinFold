@@ -75,9 +75,11 @@ def has_emb_layer_norm_before(model_state):
 
 
 def load_model_and_alphabet_core(model_data, regression_data=None):
-    print('load_model_and_alphabet_core')
+    # print('load_model_and_alphabet_core')
+    # print(model_data.keys())
     if regression_data is not None:
         model_data["model"].update(regression_data["model"])
+        print(regression_data["model"])
     arch = "msa_transformer"
     alphabet = fold.Alphabet.from_architecture(arch)
 
@@ -95,17 +97,22 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
         keys = ['hidden_size', 'add_msa_positional_embedding', 'num_layers', 'hidden_dropout', 'ffn_embed_dim', 'num_attention_heads', 'attention_dropout', 'max_tokens', 'max_position_embeddings']
 
         # 'activation_dropout': NOT FOUND in Megatron-LM
-        print(model_data["args"])
+        # print(model_data["args"])
         model_args = {arg[0]: arg[1] for arg in vars(model_data["args"]).items() if arg[0] in keys}
         # MLP: h -> 4h -> h
         model_args["intermediate_hidden_size"] = model_args["hidden_size"] * 4
         model_args["activation_dropout"] = 0.0
+        # 1024 -> 1026
+        model_args["max_position_embeddings"] -= 2
 
         # model_state = {prs1(prs2(prs3(arg[0]))): arg[1] for arg in model_data["model"].items()}
-        model_state = {arg[0]: arg[1] for arg in model_data["model"]["language_model"].items()}
-
+        # model_state = {arg[0]: arg[1] for arg in model_data["model"]["language_model"].items()}
+        model_state = {arg[0]: arg[1] for arg in model_data["model"].items()}
+        # print(model_state.keys())
         if model_args.get("add_msa_positional_embedding", False):
-            emb_dim = model_state["embedding"]["msa_positional_embeddings"]["weight"].size(-1)
+            # emb_dim = model_state["embedding"]["msa_positional_embeddings"]["weight"].size(-1)
+            # print(model_state["msa_position_embedding"].shape)
+            emb_dim = model_state["msa_position_embedding"].size(-1)
             model_args["embed_positions_msa_dim"] = emb_dim  # initial release, bug: emb_dim==1
             model_args["embed_positions_msa"] = True
 
@@ -119,11 +126,14 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
         alphabet,
     )
     # print(model.msa_position_embedding)
-    torch.save(model.state_dict(), './data/esm.pt')
+    # torch.save(model.state_dict(), './data/esm.pt')
 
     expected_keys = set(model.state_dict().keys())
     found_keys = set(model_state.keys())
-
+    # print(expected_keys)
+    # print(found_keys)
+    # print(model_state)
+    # exit(0)
     if regression_data is None:
         expected_missing = {"contact_head.regression.weight", "contact_head.regression.bias"}
         error_msgs = []
