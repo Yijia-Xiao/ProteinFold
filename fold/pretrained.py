@@ -91,10 +91,18 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
         )
         prs3 = lambda s: s.replace("row", "column") if "row" in s else s.replace("column", "row")
         # prs3 = lambda s: s.replace("column", "row") if "row" in s else s.replace("row", "column")
-        keys = ['embed_dim', 'embed_positions_msa', 'layers', 'dropout', 'ffn_embed_dim', 'attention_heads', 'attention_dropout', 'activation_dropout', 'max_tokens', 'max_positions']
-        # print(model_data["args"])
+        # 'max_positions' -> 'max_position_embeddings'
+        keys = ['hidden_size', 'embed_positions_msa', 'num_layers', 'hidden_dropout', 'ffn_embed_dim', 'num_attention_heads', 'attention_dropout', 'max_tokens', 'max_position_embeddings']
+
+        # 'activation_dropout': NOT FOUND in Megatron-LM
         model_args = {pra(arg[0]): arg[1] for arg in vars(model_data["args"]).items() if pra(arg[0]) in keys}
-        model_state = {prs1(prs2(prs3(arg[0]))): arg[1] for arg in model_data["model"].items()}
+        # MLP: h -> 4h -> h
+        model_args["intermediate_hidden_size"] = model_args["hidden_size"] * 4
+        model_args["activation_dropout"] = 0.0
+
+        # model_state = {prs1(prs2(prs3(arg[0]))): arg[1] for arg in model_data["model"].items()}
+        model_state = {prs1(prs2(prs3(arg[0]))): arg[1] for arg in model_data["model"]["language_model"].items()}
+
         if model_args.get("embed_positions_msa", False):
             emb_dim = model_state["msa_position_embedding"].size(-1)
             model_args["embed_positions_msa_dim"] = emb_dim  # initial release, bug: emb_dim==1
@@ -108,6 +116,8 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
         Namespace(**model_args),
         alphabet,
     )
+    # print(model)
+    torch.save(model.state_dict(), 'esm.pt')
 
     expected_keys = set(model.state_dict().keys())
     found_keys = set(model_state.keys())

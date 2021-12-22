@@ -98,13 +98,13 @@ class MegatronMSA(nn.Module):
         self.eos_idx = alphabet.eos_idx
         self.prepend_bos = alphabet.prepend_bos
         self.append_eos = alphabet.append_eos
-
+        print(self.args)
         self.embed_tokens = nn.Embedding(
-            self.alphabet_size, self.args.embed_dim, padding_idx=self.padding_idx
+            self.alphabet_size, self.args.hidden_size, padding_idx=self.padding_idx
         )
 
         if getattr(self.args, "embed_positions_msa", False):
-            emb_dim = getattr(self.args, "embed_positions_msa_dim", self.args.embed_dim)
+            emb_dim = getattr(self.args, "embed_positions_msa_dim", self.args.hidden_size)
             self.msa_position_embedding = nn.Parameter(
                 0.01 * torch.randn(1, 1024, 1, emb_dim),
                 requires_grad=True,
@@ -112,37 +112,37 @@ class MegatronMSA(nn.Module):
         else:
             self.register_parameter("msa_position_embedding", None)
 
-        self.dropout_module = nn.Dropout(self.args.dropout)
+        self.dropout_module = nn.Dropout(self.args.hidden_dropout)
         self.layers = nn.ModuleList(
             [
                 AxialTransformerLayer(
-                    self.args.embed_dim,
-                    self.args.ffn_embed_dim,
-                    self.args.attention_heads,
-                    self.args.dropout,
+                    self.args.hidden_size,
+                    self.args.intermediate_hidden_size,
+                    self.args.num_attention_heads,
+                    self.args.hidden_dropout,
                     self.args.attention_dropout,
                     self.args.activation_dropout,
                     getattr(self.args, "max_tokens_per_msa", self.args.max_tokens),
                 )
-                for _ in range(self.args.layers)
+                for _ in range(self.args.num_layers)
             ]
         )
 
         self.contact_head = ContactPredictionHead(
-            self.args.layers * self.args.attention_heads,
+            self.args.num_layers * self.args.num_attention_heads,
             self.prepend_bos,
             self.append_eos,
             eos_idx=self.eos_idx,
         )
         self.embed_positions = LearnedPositionalEmbedding(
-            self.args.max_positions,
-            self.args.embed_dim,
+            self.args.max_position_embeddings,
+            self.args.hidden_size,
             self.padding_idx,
         )
-        self.emb_layer_norm_before = ESM1bLayerNorm(self.args.embed_dim)
-        self.emb_layer_norm_after = ESM1bLayerNorm(self.args.embed_dim)
+        self.emb_layer_norm_before = ESM1bLayerNorm(self.args.hidden_size)
+        self.emb_layer_norm_after = ESM1bLayerNorm(self.args.hidden_size)
         self.lm_head = RobertaLMHead(
-            embed_dim=self.args.embed_dim,
+            embed_dim=self.args.hidden_size,
             output_dim=self.alphabet_size,
             weight=self.embed_tokens.weight,
         )
@@ -228,7 +228,7 @@ class MegatronMSA(nn.Module):
 
     @property
     def num_layers(self):
-        return self.args.layers
+        return self.args.num_layers
 
     def max_tokens_per_msa_(self, value: int) -> None:
         """The MSA Transformer automatically batches attention computations when
