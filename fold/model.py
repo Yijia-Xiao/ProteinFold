@@ -207,6 +207,7 @@ class MegatronMSA(nn.Module):
             hidden_representations[layer_idx + 1] = x
         # x = self.lm_head(x)
 
+        # fake logits, real representation (last layer)
         result = {"logits": x, "representations": hidden_representations}
         if need_head_weights:
             # col_attentions: B x L x H x C x R x R
