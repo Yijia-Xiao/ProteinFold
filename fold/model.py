@@ -154,9 +154,22 @@ class MegatronMSA(nn.Module):
         padding_mask = tokens.eq(self.padding_idx)  # B, R, C
         if not padding_mask.any():
             padding_mask = None
-
+        print(f"{tokens.sum()=}")
+        print(f"{tokens[0][0]=}")
+        print(f"{tokens[0][-1]=}")
+        print(f"{tokens.shape}=")
+        print(f"{self.args.hidden_size=}")
         x = self.embed_tokens(tokens)
+        print(f"word_embedding.shape, {x.shape=}")
+        print(f"word_embedding.sum, {x.sum()=}")
+        print(f"word_embedding.sum, {x[0].sum(dim=-1)=}")
         x += self.embed_positions(tokens.view(batch_size * num_alignments, seqlen)).view(x.size())
+        pos_embed = self.embed_positions(tokens.view(batch_size * num_alignments, seqlen)).view(x.size())
+        print(f"{tokens.shape=}")
+        print(f"pos_embed.shape, {pos_embed.shape=}")
+        print(f"pos_embed.sum, {pos_embed.sum()=}")
+        # print(pos_embed[0][0][0])
+        # print(pos_embed[0][0][4])
         if self.msa_position_embedding is not None:
             if x.size(1) > 1024:
                 raise RuntimeError(
@@ -190,6 +203,7 @@ class MegatronMSA(nn.Module):
                 self_attn_padding_mask=padding_mask,
                 need_head_weights=need_head_weights,
             )
+            print(f"{layer_idx} x.sum() {x[0].sum()}")
             if need_head_weights:
                 x, col_attn, row_attn = x
                 # H x C x B x R x R -> B x H x C x R x R
@@ -224,6 +238,9 @@ class MegatronMSA(nn.Module):
 
     def predict_contacts(self, tokens):
         return self(tokens, return_contacts=True)["contacts"]
+
+    def predict_tots(self, tokens):
+        return self(tokens, return_contacts=True)
 
     @property
     def num_layers(self):

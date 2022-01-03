@@ -7,7 +7,6 @@ import itertools
 from typing import List, Tuple
 import string
 
-
 torch.set_grad_enabled(False)
 
 #  [markdown]
@@ -47,15 +46,19 @@ msa_transformer = msa_transformer.eval().cuda()
 msa_batch_converter = msa_alphabet.get_batch_converter()
 
 msa_data = [
-    read_msa("./examples/1a3a_1_A.a3m", 64),
-    read_msa("./examples/5ahw_1_A.a3m", 64),
-    read_msa("./examples/1xcr_1_A.a3m", 64),
+    # read_msa("./examples/1a3a_1_A.a3m", 64),
+    # read_msa("./examples/5ahw_1_A.a3m", 64),
+    # read_msa("./examples/1xcr_1_A.a3m", 64),
+    read_msa("./data/sample.a2m", 96),
 ]
 msa_batch_labels, msa_batch_strs, msa_batch_tokens = msa_batch_converter(msa_data)
 msa_batch_tokens = msa_batch_tokens.cuda()
 print(msa_batch_tokens.size(), msa_batch_tokens.dtype)  # Should be a 3D tensor with dtype torch.int64.
 
-msa_contacts = msa_transformer.predict_contacts(msa_batch_tokens).cpu()
+# msa_contacts = msa_transformer.predict_contacts(msa_batch_tokens).cpu()
+msa_ret = msa_transformer.predict_tots(msa_batch_tokens)
+msa_contacts = msa_ret['contacts'].cpu()
+msa_row = msa_ret['row_attentions'].cpu()
 
 fig, axes = plt.subplots(figsize=(18, 6), ncols=3)
 for ax, contact, msa in zip(axes, msa_contacts, msa_batch_strs):
@@ -63,4 +66,28 @@ for ax, contact, msa in zip(axes, msa_contacts, msa_batch_strs):
     ax.imshow(contact[:seqlen, :seqlen], cmap="Blues")
 
 # plt.show()
-plt.savefig('map.png')
+plt.savefig('sample.png')
+
+
+
+def symmetrize(x):
+    "Make layer symmetric in final two dimensions, used for contact prediction."
+    return x + x.transpose(-1, -2)
+
+def apc(x):
+    "Perform average product correct, used for contact prediction."
+    a1 = x.sum(-1, keepdims=True)
+    a2 = x.sum(-2, keepdims=True)
+    a12 = x.sum((-1, -2), keepdims=True)
+
+    avg = a1 * a2
+    avg.div_(a12)  # in-place to reduce memory
+    normalized = x - avg
+    return normalized
+
+# 12, 8
+def plot(i, j):
+    plt.figure()
+    # plt.imshow(msa_row[0][i][j][1:, 1:].float())
+    plt.imshow(apc(symmetrize(msa_row[0][i][j][1:, 1:].float().softmax(dim=-1))), cmap='Blues')
+    plt.savefig('row.png')

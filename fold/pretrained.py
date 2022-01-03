@@ -56,7 +56,7 @@ def load_model_and_alphabet_hub(model_name):
 
 
 def load_model_and_alphabet_local(model_location):
-    print('load_model_and_alphabet_local')
+    # print('load_model_and_alphabet_local')
     """ Load from local path. The regression weights need to be co-located """
     model_location = Path(model_location)
     model_data = torch.load(str(model_location), map_location="cpu")
@@ -104,12 +104,15 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
         model_args["activation_dropout"] = 0.0
         # 1024 -> 1026
         model_args["max_position_embeddings"] -= 2
+        # model_args["max_position_embeddings"] -= 1
 
         # model_state = {prs1(prs2(prs3(arg[0]))): arg[1] for arg in model_data["model"].items()}
         # model_state = {arg[0]: arg[1] for arg in model_data["model"]["language_model"].items()}
         model_state = {arg[0]: arg[1] for arg in model_data["model"].items()}
         # print(model_state.keys())
-        if model_args.get("add_msa_positional_embedding", False):
+        # print(f"{model_args['add_msa_positional_embedding']=}")
+        # if model_args.get("add_msa_positional_embedding", False):
+        if model_args.get("add_msa_positional_embedding", True):
             # emb_dim = model_state["embedding"]["msa_positional_embeddings"]["weight"].size(-1)
             # print(model_state["msa_position_embedding"].shape)
             emb_dim = model_state["msa_position_embedding"].size(-1)
@@ -128,10 +131,10 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
     # print(model.msa_position_embedding)
     # torch.save(model.state_dict(), './data/esm.pt')
 
-    expected_keys = set(model.state_dict().keys())
-    found_keys = set(model_state.keys())
-    # print(expected_keys)
-    # print(found_keys)
+    expected_keys = len(model.state_dict().keys())
+    found_keys = len(model_state.keys())
+    print(expected_keys)
+    print(found_keys)
     # print(model_state)
     # exit(0)
     if regression_data is None:

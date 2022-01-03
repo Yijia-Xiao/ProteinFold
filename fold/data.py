@@ -159,12 +159,15 @@ class Alphabet(object):
             standard_toks = proteinseq_toks["toks"]
             prepend_toks = ("<cls>", "<pad>", "<eos>", "<unk>")
             append_toks = ("<mask>",)
+            # prepend_toks = ("<pad>", "<mask>", "<cls>", "<sep>", "<unk>")
+            # append_toks = ()
             prepend_bos = True
             append_eos = False
             use_msa = True
         else:
             raise ValueError("Unknown architecture selected")
         return cls(standard_toks, prepend_toks, append_toks, prepend_bos, append_eos, use_msa)
+        # return cls(standard_toks, prepend_toks, append_toks, prepend_bos, append_eos, use_msa)
 
     def _tokenize(self, text) -> str:
         return text.split()
