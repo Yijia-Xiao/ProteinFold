@@ -1,11 +1,22 @@
 import matplotlib.pyplot as plt
 import fold
 import torch
-import os
 from Bio import SeqIO
 import itertools
 from typing import List, Tuple
 import string
+from fold.converter import convert
+import argparse
+
+parser = argparse.ArgumentParser(description="Convert Megatron-LM checkpoint to Pytorch.")
+
+parser.add_argument(
+    "--model", type=str, help="Path to Megatron-MSA model file."
+)
+args = parser.parse_args()
+
+model_path = args.model
+convert(model_path)
 
 torch.set_grad_enabled(False)
 
@@ -41,7 +52,8 @@ def read_msa(filename: str, nseq: int) -> List[Tuple[str, str]]:
 # The MSAs used here are samples from the [`trRosetta` (v1) dataset](https://yanglab.nankai.edu.cn/trRosetta/benchmark/), also used in the MSA Transformer paper.
 
 # msa_transformer, msa_alphabet = fold.pretrained.esm_msa1b_t12_100M_UR50S()
-msa_transformer, msa_alphabet = fold.pretrained.megatron_msa_1B()
+# msa_transformer, msa_alphabet = fold.pretrained.megatron_msa_1B("./data/megatron.pt")
+msa_transformer, msa_alphabet = fold.pretrained.megatron_msa_1B(model_path.split('/')[0] + "/megatron.pt")
 msa_transformer = msa_transformer.eval().cuda()
 msa_batch_converter = msa_alphabet.get_batch_converter()
 
@@ -91,3 +103,15 @@ def plot(i, j):
     # plt.imshow(msa_row[0][i][j][1:, 1:].float())
     plt.imshow(apc(symmetrize(msa_row[0][i][j][1:, 1:].float().softmax(dim=-1))), cmap='Blues')
     plt.savefig('row.png')
+
+
+layers, heads = msa_transformer.args.num_layers, msa_transformer.args.num_attention_heads
+
+fig, axs = plt.subplots(layers, heads)
+
+# for i in range(6, layers):
+for i in range(layers - 2, layers):
+    for j in range(heads):
+        axs[i, j].imshow(apc(symmetrize(msa_row[0][i][j][1:, 1:].float().softmax(dim=-1))), cmap='Blues')
+
+plt.savefig('maps.png')

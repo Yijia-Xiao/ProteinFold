@@ -163,13 +163,13 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
     return model, alphabet
 
 
-def megatron_msa_1B():
+def megatron_msa_1B(path):
     """14 layer MSA transformer model with 1B params.
 
     Returns a tuple of (Model, Alphabet).
     """
     # return load_model_and_alphabet_hub("megatron_msa_1B")
-    return load_model_and_alphabet_local("./data/megatron.pt")
+    return load_model_and_alphabet_local(path)
 
 
 def esm1_t34_670M_UR50S():
