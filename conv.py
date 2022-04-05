@@ -16,6 +16,8 @@ args = parser.parse_args()
 src = args.src
 tgt = args.tgt
 
+print(src, tgt)
+
 source = torch.load(src)
 # print(source.keys())
 src_embed = source['model']['language_model']['embedding']
@@ -127,9 +129,11 @@ target['emb_layer_norm_after.weight'] = src_transformer['final_layernorm.weight'
 target['emb_layer_norm_after.bias'] = src_transformer['final_layernorm.bias']
 
 # torch.save(target_dict, tgt)
-model_dir = src.split('/')[-1]
+# model_dir = src.split('/')[-1]
 
-torch.save(target_dict, f'{model_dir}/megatron.pt')
+# torch.save(target_dict, f'{model_dir}/megatron.pt')
+print(tgt)
+torch.save(target_dict, f'{tgt}/megatron.pt')
 
 def prepare_reg():
     # a = torch.load('/home/yijia/.cache/torch/hub/checkpoints/esm_msa1b_t12_100M_UR50S-contact-regression.pt')
@@ -141,8 +145,8 @@ def prepare_reg():
     # p[-10:] = 0.1
 
     p = torch.tensor(
-        [0 for i in range(num_transformer_layer * num_heads)]
-    )
+        [i for i in range(num_transformer_layer * num_heads)]
+    ).float()
     
     # print(p)
     # p.squeeze_(0)
@@ -150,10 +154,13 @@ def prepare_reg():
     p.unsqueeze_(0)
     # print(p)
 
-    b = {'model': {'contact_head.regression.weight': p.float(), 'contact_head.regression.bias': torch.tensor([-5.5], device='cuda:0')}}
-    print(b)
-
-    torch.save(b,f'{model_dir}/megatron-contact-regression.pt')
+    b = {'model': {'contact_head.regression.weight': p, 'contact_head.regression.bias': torch.tensor([-5.5], device='cuda:0')}}
+    print(b, f'{tgt}/megatron-contact-regression.pt')
+    # print(tgt)
+    # torch.save(b,f'{tgt}/megatron-contact-regression.pt')
+    import os
+    torch.save(b, os.path.join(tgt, 'megatron-contact-regression.pt'))
+    print('#' * 100)
 
 prepare_reg()
 

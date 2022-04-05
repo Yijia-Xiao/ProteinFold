@@ -54,13 +54,11 @@ def read_msa(filename: str, nseq: int) -> List[Tuple[str, str]]:
 # msa_transformer, msa_alphabet = fold.pretrained.esm_msa1b_t12_100M_UR50S()
 # msa_transformer, msa_alphabet = fold.pretrained.megatron_msa_1B("./data/megatron.pt")
 msa_transformer, msa_alphabet = fold.pretrained.megatron_msa_1B(model_path.split('/')[0] + "/megatron.pt")
+print(model_path.split('/')[0] + "/megatron.pt")
 msa_transformer = msa_transformer.eval().cuda()
 msa_batch_converter = msa_alphabet.get_batch_converter()
 
 msa_data = [
-    # read_msa("./examples/1a3a_1_A.a3m", 64),
-    # read_msa("./examples/5ahw_1_A.a3m", 64),
-    # read_msa("./examples/1xcr_1_A.a3m", 64),
     read_msa("./data/sample.a2m", 96),
 ]
 msa_batch_labels, msa_batch_strs, msa_batch_tokens = msa_batch_converter(msa_data)
