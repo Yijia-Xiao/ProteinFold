@@ -127,7 +127,7 @@ def convert(src):
     target['emb_layer_norm_after.bias'] = src_transformer['final_layernorm.bias']
 
     # torch.save(target_dict, tgt)
-    model_dir = src.rsplit('/')[0]
+    model_dir = '/'.join(src.rsplit('/')[:-1]) # src.rsplit('/')[0]
 
     torch.save(target_dict, f'{model_dir}/megatron.pt')
 
