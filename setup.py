@@ -23,6 +23,6 @@ setup(
     url="https://github.com/Yijia-Xiao/ProteinFold",
     license="MIT",
     packages=["fold"],
-    data_files=[("source_docs/fold", ["LICENSE", "README.md", "CODE_OF_CONDUCT.rst"])],
+    data_files=[("source_docs/fold", ["LICENSE", "README.md"])],
     zip_safe=True,
 )
