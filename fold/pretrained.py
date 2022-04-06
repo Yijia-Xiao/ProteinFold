@@ -11,10 +11,10 @@ import torch
 import fold
 
 
-def _has_regression_weights(model_name):
-    """Return whether we expect / require regression weights;
-    Right now that is all models except ESM-1v"""
-    return not ("esm1v" in model_name)
+# def _has_regression_weights(model_name):
+#     """Return whether we expect / require regression weights;
+#     Right now that is all models except ESM-1v"""
+#     return not ("esm1v" in model_name)
 
 
 def load_model_and_alphabet(model_name):
@@ -48,10 +48,10 @@ def load_regression_hub(model_name):
 def load_model_and_alphabet_hub(model_name):
     url = f"https://dl.fbaipublicfiles.com/fair-esm/models/{model_name}.pt"
     model_data = load_hub_workaround(url)
-    if _has_regression_weights(model_name):
-        regression_data = load_regression_hub(model_name)
-    else:
-        regression_data = None
+    # if _has_regression_weights(model_name):
+    regression_data = load_regression_hub(model_name)
+    # else:
+    #     regression_data = None
     return load_model_and_alphabet_core(model_data, regression_data)
 
 
@@ -61,11 +61,11 @@ def load_model_and_alphabet_local(model_location):
     model_location = Path(model_location)
     model_data = torch.load(str(model_location), map_location="cpu")
     model_name = model_location.stem
-    if _has_regression_weights(model_name):
-        regression_location = str(model_location.with_suffix("")) + "-contact-regression.pt"
-        regression_data = torch.load(regression_location, map_location="cpu")
-    else:
-        regression_data = None
+    # if _has_regression_weights(model_name):
+    regression_location = str(model_location.with_suffix("")) + "-contact-regression.pt"
+    regression_data = torch.load(regression_location, map_location="cpu")
+    # else:
+    #     regression_data = None
     return load_model_and_alphabet_core(model_data, regression_data)
 
 
@@ -170,118 +170,3 @@ def megatron_msa_1B(path):
     """
     # return load_model_and_alphabet_hub("megatron_msa_1B")
     return load_model_and_alphabet_local(path)
-
-
-def esm1_t34_670M_UR50S():
-    """34 layer transformer model with 670M params, trained on Uniref50 Sparse.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1_t34_670M_UR50S")
-
-
-def esm1_t34_670M_UR50D():
-    """34 layer transformer model with 670M params, trained on Uniref50 Dense.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1_t34_670M_UR50D")
-
-
-def esm1_t34_670M_UR100():
-    """34 layer transformer model with 670M params, trained on Uniref100.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1_t34_670M_UR100")
-
-
-def esm1_t12_85M_UR50S():
-    """12 layer transformer model with 85M params, trained on Uniref50 Sparse.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1_t12_85M_UR50S")
-
-
-def esm1_t6_43M_UR50S():
-    """6 layer transformer model with 43M params, trained on Uniref50 Sparse.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1_t6_43M_UR50S")
-
-
-def esm1b_t33_650M_UR50S():
-    """33 layer transformer model with 650M params, trained on Uniref50 Sparse.
-    This is our best performing model, which will be described in a future publication.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1b_t33_650M_UR50S")
-
-
-def esm_msa1_t12_100M_UR50S():
-    warnings.warn(
-        "This model had a minor bug in the positional embeddings, "
-        "please use ESM-MSA-1b: fold.pretrained.esm_msa1b_t12_100M_UR50S()",
-    )
-    return load_model_and_alphabet_hub("esm_msa1_t12_100M_UR50S")
-
-
-def esm_msa1b_t12_100M_UR50S():
-    return load_model_and_alphabet_hub("esm_msa1b_t12_100M_UR50S")
-
-
-def esm1v_t33_650M_UR90S():
-    """33 layer transformer model with 650M params, trained on Uniref90.
-    This is model 1 of a 5 model ensemble.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1v_t33_650M_UR90S_1")
-
-
-def esm1v_t33_650M_UR90S_1():
-    """33 layer transformer model with 650M params, trained on Uniref90.
-    This is model 1 of a 5 model ensemble.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1v_t33_650M_UR90S_1")
-
-
-def esm1v_t33_650M_UR90S_2():
-    """33 layer transformer model with 650M params, trained on Uniref90.
-    This is model 2 of a 5 model ensemble.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1v_t33_650M_UR90S_2")
-
-
-def esm1v_t33_650M_UR90S_3():
-    """33 layer transformer model with 650M params, trained on Uniref90.
-    This is model 3 of a 5 model ensemble.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1v_t33_650M_UR90S_3")
-
-
-def esm1v_t33_650M_UR90S_4():
-    """33 layer transformer model with 650M params, trained on Uniref90.
-    This is model 4 of a 5 model ensemble.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1v_t33_650M_UR90S_4")
-
-
-def esm1v_t33_650M_UR90S_5():
-    """33 layer transformer model with 650M params, trained on Uniref90.
-    This is model 5 of a 5 model ensemble.
-
-    Returns a tuple of (Model, Alphabet).
-    """
-    return load_model_and_alphabet_hub("esm1v_t33_650M_UR90S_5")
