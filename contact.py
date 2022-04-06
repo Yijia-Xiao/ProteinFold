@@ -62,6 +62,8 @@ msa_batch_converter = msa_alphabet.get_batch_converter()
 
 msa_data = [
     read_msa("./data/sample.a2m", 96),
+    read_msa("./data/sample.a2m", 64),
+    read_msa("./data/sample.a2m", 32),
 ]
 msa_batch_labels, msa_batch_strs, msa_batch_tokens = msa_batch_converter(msa_data)
 msa_batch_tokens = msa_batch_tokens.cuda()
