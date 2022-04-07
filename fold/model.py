@@ -203,7 +203,7 @@ class MegatronMSA(nn.Module):
                 self_attn_padding_mask=padding_mask,
                 need_head_weights=need_head_weights,
             )
-            print(f"{layer_idx} x.sum() {x[0].sum()}")
+            print(f"{layer_idx} x.sum() {x[0][0].sum()}")
             if need_head_weights:
                 x, col_attn, row_attn = x
                 # H x C x B x R x R -> B x H x C x R x R
@@ -238,6 +238,9 @@ class MegatronMSA(nn.Module):
 
     def predict_contacts(self, tokens):
         return self(tokens, return_contacts=True)["contacts"]
+
+    def predict_heads(self, tokens):
+        return self(tokens, need_head_weights=True)
 
     def predict_tots(self, tokens):
         return self(tokens, return_contacts=True)

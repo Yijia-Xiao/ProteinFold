@@ -79,7 +79,7 @@ def load_model_and_alphabet_core(model_data, regression_data=None):
     # print(model_data.keys())
     if regression_data is not None:
         model_data["model"].update(regression_data["model"])
-        print(regression_data["model"])
+        # print(regression_data["model"])
     arch = "msa_transformer"
     alphabet = fold.Alphabet.from_architecture(arch)
 
