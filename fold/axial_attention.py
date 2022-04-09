@@ -228,7 +228,6 @@ class ColumnSelfAttention(nn.Module):
         self_attn_padding_mask=None,
     ):
         num_rows, num_cols, batch_size, embed_dim = x.size()
-        # if False and num_rows * num_cols > 2 ** 14 and not torch.is_grad_enabled():
         if (num_rows * num_cols) > self.max_tokens_per_msa and not torch.is_grad_enabled():
             return self._batched_forward(
                 x,
