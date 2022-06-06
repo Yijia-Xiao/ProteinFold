@@ -43,8 +43,6 @@ Explanation on the outputs:
 - `row_attention_maps` is a list of row attention maps from all axial-transformer layers.
 - `contacts` is the contact map predicted by the model (or None if `require_contacts` is set to False).
 
-## Model availability
-Coming soon...
 
 ## Example
 There are three contact maps generate by Megatron-MSA (1B).
