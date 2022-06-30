@@ -49,7 +49,7 @@ Explanation on the outputs:
 ## Example
 There are three contact maps generate by Megatron-MSA (1B).
 
-![](./sample.png)
+![sample](./sample.png)
 
 
 ## Acknowledgement
