@@ -23,6 +23,8 @@ Alignment sequence-2
 > description-3
 Alignment sequence-3
 ```
+### Model availability
+We will provide the pretrained model soon.
 
 ### Inference
 ```python
@@ -48,3 +50,7 @@ Explanation on the outputs:
 There are three contact maps generate by Megatron-MSA (1B).
 
 ![](./sample.png)
+
+
+## Acknowledgement
+The toolkit's backbone is based on [ESM](https://github.com/facebookresearch/esm).
